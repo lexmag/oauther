@@ -15,6 +15,12 @@ defmodule OAuther do
     [{"oauth_signature", signature} | params]
   end
 
+  def header(params) do
+    {oauth_params, req_params} = Enum.partition(params, &protocol_param?/1)
+
+    {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
+  end
+
   def protocol_params(params, %Credentials{} = creds) do
     [{"oauth_consumer_key",     creds.consumer_key},
      {"oauth_nonce",            nonce},
@@ -37,6 +43,19 @@ defmodule OAuther do
     base_string(verb, url, params)
     |> :public_key.sign(:sha, read_private_key(creds.consumer_secret))
     |> Base.encode64
+  end
+
+  defp protocol_param?({key, _v}) do
+    String.starts_with?(key, "oauth_")
+  end
+
+  defp compose_header([_ | _] = params) do
+    Stream.map(params, &percent_encode/1)
+    |> Enum.map_join(", ", &compose_header/1)
+  end
+
+  defp compose_header({key, value}) do
+    key <> "=\"" <> value <> "\""
   end
 
   defp compose_key(creds) do
