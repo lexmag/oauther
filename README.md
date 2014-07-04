@@ -23,3 +23,7 @@ iex> {header, req_params} = OAuther.header(params)
 iex> :hackney.post("https://api.twitter.com/1.1/statuses/lookup.json", [header], {:form, req_params})
 {:ok, 200, [...], #Reference<0.0.0.837>}
 ```
+
+## License
+
+This software is licensed under [the ISC license](LICENSE).
