@@ -2,7 +2,23 @@
 
 Library to authenticate with [OAuth 1.0](http://tools.ietf.org/html/rfc5849) protocol.
 
+## Installation
+
+Add OAuther as a dependency to your `mix.exs` file:
+
+```elixir
+defp deps do
+  [{:oauther, "~> 1.0.0"}]
+end
+```
+
+After you are done, run `mix deps.get` in your shell to fetch the dependencies.
+
 ## Usage
+
+Example below shows the use of [hackney HTTP client](https://github.com/benoitc/hackney)
+for interacting with Twitter API.
+Protocol parameters are transmitted using the HTTP "Authorization" header field.
 
 ```iex
 iex> creds = OAuther.credentials(consumer_key: "dpf43f3p2l4k3l03", consumer_secret: "kd94hf93k423kf44", token: "nnch734d00sl2jdk", token_secret: "pfkkdhi9sl3r4s00")
