@@ -1,7 +1,7 @@
 defmodule OAuther do
   defmodule Credentials do
-    defstruct consumer_key: nil, consumer_secret: nil,
-              method: :hmac_sha1, token: nil, token_secret: nil
+    defstruct [:consumer_key, :consumer_secret,
+               :token, :token_secret, method: :hmac_sha1]
   end
 
   def credentials(args) do
