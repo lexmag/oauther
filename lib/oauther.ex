@@ -4,6 +4,8 @@ defmodule OAuther do
                :token, :token_secret, method: :hmac_sha1]
   end
 
+  alias :public_key, as: PKey
+
   def credentials(args) do
     struct(Credentials, args)
   end
@@ -41,7 +43,7 @@ defmodule OAuther do
 
   def signature(verb, url, params, %{method: :rsa_sha1} = creds) do
     base_string(verb, url, params)
-    |> :public_key.sign(:sha, read_private_key(creds.consumer_secret))
+    |> PKey.sign(:sha, read_private_key(creds.consumer_secret))
     |> Base.encode64
   end
 
@@ -65,8 +67,8 @@ defmodule OAuther do
 
   defp read_private_key(path) do
     File.read!(path)
-    |> :public_key.pem_decode
-    |> hd |> :public_key.pem_entry_decode
+    |> PKey.pem_decode
+    |> hd |> PKey.pem_entry_decode
   end
 
   defp base_string(verb, url, params) do
