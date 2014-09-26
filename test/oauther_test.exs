@@ -8,7 +8,7 @@ defmodule OAutherTest do
   end
 
   test "RSA-SHA1 signature" do
-    creds = OAuther.credentials(method: :rsa_sha1, consumer_secret: fixture_path("qwe.pem"), consumer_key: "dpf43f3p2l4k3l03")
+    creds = OAuther.credentials(method: :rsa_sha1, consumer_secret: fixture_path("cert.pem"), consumer_key: "dpf43f3p2l4k3l03")
 
     assert signature(protocol_params(creds), creds) == "cyZ9hTJnRfkOnF5+OzxXWKKG+hRY+/esxdQAluJem1RlHkZQRsFEevOS5x+A1ZoS+aYlTU3xdHkEKIb/+xuqaavAUFVaIF/5448XsXqSTJomvpoC1c7yw5ArNZnPRLYwK3XYHaIr5FHXbiCG/ze093i2MpsusQU6Shn8lGJNMWE="
   end
