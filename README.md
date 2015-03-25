@@ -20,24 +20,24 @@ Example below shows the use of [hackney HTTP client](https://github.com/benoitc/
 for interacting with Twitter API.
 Protocol parameters are transmitted using the HTTP "Authorization" header field.
 
-```iex
-iex> creds = OAuther.credentials(consumer_key: "dpf43f3p2l4k3l03", consumer_secret: "kd94hf93k423kf44", token: "nnch734d00sl2jdk", token_secret: "pfkkdhi9sl3r4s00")
-%OAuther.Credentials{consumer_key: "dpf43f3p2l4k3l03",
- consumer_secret: "kd94hf93k423kf44", method: :hmac_sha1,
- token: "nnch734d00sl2jdk", token_secret: "pfkkdhi9sl3r4s00"}
-iex> params = OAuther.sign("post", "https://api.twitter.com/1.1/statuses/lookup.json", [{"id", 485086311205048320}], creds)
-[{"oauth_signature", "10ZSs6eeWP+IfzElF5xFX/wsqnY="},
- {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
- {"oauth_nonce", "M0vwJncX7T2GQwGXM4zFEa1mvL9RReLtkwwcBvlxG0A="},
- {"oauth_signature_method", "HMAC-SHA1"}, {"oauth_timestamp", 1404500030},
- {"oauth_version", "1.0"}, {"oauth_token", "nnch734d00sl2jdk"},
- {"id", 485086311205048320}]
-iex> {header, req_params} = OAuther.header(params)
-{{"Authorization",
-  "OAuth oauth_signature=\"10ZSs6eeWP%2BIfzElF5xFX%2FwsqnY%3D\", oauth_consumer_key=\"dpf43f3p2l4k3l03\", oauth_nonce=\"M0vwJncX7T2GQwGXM4zFEa1mvL9RReLtkwwcBvlxG0A%3D\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"1404500030\", oauth_version=\"1.0\", oauth_token=\"nnch734d00sl2jdk\""},
- [{"id", 485086311205048320}]}
-iex> :hackney.post("https://api.twitter.com/1.1/statuses/lookup.json", [header], {:form, req_params})
-{:ok, 200, [...], #Reference<0.0.0.837>}
+```elixir
+creds = OAuther.credentials(consumer_key: "dpf43f3p2l4k3l03", consumer_secret: "kd94hf93k423kf44", token: "nnch734d00sl2jdk", token_secret: "pfkkdhi9sl3r4s00")
+# => %OAuther.Credentials{consumer_key: "dpf43f3p2l4k3l03",
+# consumer_secret: "kd94hf93k423kf44", method: :hmac_sha1,
+# token: "nnch734d00sl2jdk", token_secret: "pfkkdhi9sl3r4s00"}
+params = OAuther.sign("post", "https://api.twitter.com/1.1/statuses/lookup.json", [{"id", 485086311205048320}], creds)
+# => [{"oauth_signature", "10ZSs6eeWP+IfzElF5xFX/wsqnY="},
+# {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
+# {"oauth_nonce", "M0vwJncX7T2GQwGXM4zFEa1mvL9RReLtkwwcBvlxG0A="},
+# {"oauth_signature_method", "HMAC-SHA1"}, {"oauth_timestamp", 1404500030},
+# {"oauth_version", "1.0"}, {"oauth_token", "nnch734d00sl2jdk"},
+# {"id", 485086311205048320}]
+{header, req_params} = OAuther.header(params)
+# => {{"Authorization",
+# "OAuth oauth_signature=\"10ZSs6eeWP%2BIfzElF5xFX%2FwsqnY%3D\", oauth_consumer_key=\"dpf43f3p2l4k3l03\", oauth_nonce=\"M0vwJncX7T2GQwGXM4zFEa1mvL9RReLtkwwcBvlxG0A%3D\", oauth_signature_method=\"HMAC-SHA1\", oauth_timestamp=\"1404500030\", oauth_version=\"1.0\", oauth_token=\"nnch734d00sl2jdk\""},
+# [{"id", 485086311205048320}]}
+:hackney.post("https://api.twitter.com/1.1/statuses/lookup.json", [header], {:form, req_params})
+# => {:ok, 200, [...], #Reference<0.0.0.837>}
 ```
 
 ## License
