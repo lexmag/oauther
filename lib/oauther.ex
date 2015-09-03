@@ -72,19 +72,25 @@ defmodule OAuther do
   end
 
   defp base_string(verb, url, params) do
-    [verb, URI.parse(url), params]
-    |> Stream.map(&normalize/1)
-    |> Enum.map_join("&", &percent_encode/1)
+    {base_url, q_params} = parse_url(url)
+    [String.upcase(verb), base_url, normalize_params(params, q_params)]
+      |> Enum.map_join("&", &percent_encode/1)
   end
 
-  defp normalize(verb) when is_binary(verb),
-    do: String.upcase(verb)
+  defp parse_url(url) do
+    uri = URI.parse(url)
+    {"#{uri.scheme}://#{uri.host}#{uri.path}", parse_query_params(uri) }
+  end
 
-  defp normalize(%URI{host: host} = uri),
-    do: %{uri | host: String.downcase(host)}
+  defp parse_query_params(%URI{query: nil}), do: []
 
-  defp normalize([_ | _] = params) do
-    Enum.map(params, &percent_encode/1)
+  defp parse_query_params(%URI{} = uri) do
+    uri.query |> URI.decode_query |> Enum.into []
+  end
+
+  defp normalize_params(params, q_params) do
+    Enum.concat(params, q_params)
+    |> Enum.map(&percent_encode/1)
     |> Enum.sort
     |> Enum.map_join("&", &normalize/1)
   end
@@ -94,7 +100,7 @@ defmodule OAuther do
   end
 
   defp nonce do
-    :crypto.rand_bytes(32) |> Base.encode64
+    :crypto.rand_bytes(16) |> Hexate.encode
   end
 
   defp timestamp do

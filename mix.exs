@@ -6,7 +6,8 @@ defmodule OAuther.Mixfile do
      version: "1.0.1",
      elixir: ">= 0.14.1",
      description: description,
-     package: package]
+     package: package,
+     deps: deps]
   end
 
   def application do
@@ -21,5 +22,11 @@ defmodule OAuther.Mixfile do
      contributors: ["Aleksei Magusev"],
      licenses: ["ISC"],
      links: %{"GitHub" => "https://github.com/lexmag/oauther"}]
+  end
+
+  defp deps do
+    [
+      {:hexate,  ">= 0.5.0"}
+    ]
   end
 end
