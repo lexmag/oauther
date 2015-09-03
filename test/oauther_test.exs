@@ -19,6 +19,11 @@ defmodule OAutherTest do
     assert signature([], creds) == "kd94hf93k423kf44&"
   end
 
+  test "signature with query params" do
+    creds = OAuther.credentials(consumer_secret: "kd94hf93k423kf44", token_secret: "pfkkdhi9sl3r4s00", consumer_key: "dpf43f3p2l4k3l03", token: "nnch734d00sl2jdk")
+    assert signature(protocol_params(creds), creds, "http://photos.example.com/photos?size=large") == "EgRKfoy8ThOLqmyWXEHgi8+OXTo="
+  end
+
   test "Authorization header" do
     {header, req_params} = OAuther.header [
       {"oauth_consumer_key",     "dpf43f3p2l4k3l03"},
@@ -54,7 +59,7 @@ defmodule OAutherTest do
     end
   end
 
-  defp signature(params, creds) do
-    OAuther.signature("get", "http://photos.example.net/photos", params, creds)
+  defp signature(params, creds, query \\ "http://photos.example.net/photos") do
+    OAuther.signature("get", query, params, creds)
   end
 end

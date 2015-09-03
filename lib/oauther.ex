@@ -72,7 +72,8 @@ defmodule OAuther do
   end
 
   defp base_string(verb, url, params) do
-    [verb, URI.parse(url), params]
+    {uri, query_params} = parse_url(url)
+    [verb, uri, params ++ query_params]
     |> Stream.map(&normalize/1)
     |> Enum.map_join("&", &percent_encode/1)
   end
@@ -91,6 +92,17 @@ defmodule OAuther do
 
   defp normalize({key, value}) do
     key <> "=" <> value
+  end
+
+  defp parse_url(url) do
+    uri = URI.parse(url)
+    {%{uri | query: nil}, parse_query_params(uri.query)}
+  end
+
+  def parse_query_params(nil), do: []
+
+  def parse_query_params(params) do
+    URI.query_decoder(params) |> Enum.into([])
   end
 
   defp nonce do
