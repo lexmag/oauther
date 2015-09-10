@@ -79,13 +79,13 @@ defmodule OAuther do
 
   defp parse_url(url) do
     uri = URI.parse(url)
-    {"#{uri.scheme}://#{uri.host}#{uri.path}", parse_query_params(uri) }
+    {to_string(%{ uri | query: nil }), parse_query_params(uri.query) }
   end
 
-  defp parse_query_params(%URI{query: nil}), do: []
+  defp parse_query_params(nil), do: []
 
-  defp parse_query_params(%URI{} = uri) do
-    uri.query |> URI.decode_query |> Enum.into []
+  defp parse_query_params(query) do
+    query |> URI.decode_query |> Enum.into []
   end
 
   defp normalize_params(params, q_params) do
