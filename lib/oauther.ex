@@ -72,31 +72,37 @@ defmodule OAuther do
   end
 
   defp base_string(verb, url, params) do
-    {base_url, q_params} = parse_url(url)
-    [String.upcase(verb), base_url, normalize_params(params, q_params)]
-      |> Enum.map_join("&", &percent_encode/1)
+    {uri, query_params} = parse_url(url)
+    [verb, uri, params ++ query_params]
+    |> Stream.map(&normalize/1)
+    |> Enum.map_join("&", &percent_encode/1)
   end
 
-  defp parse_url(url) do
-    uri = URI.parse(url)
-    {to_string(%{ uri | query: nil }), parse_query_params(uri.query) }
-  end
+  defp normalize(verb) when is_binary(verb),
+    do: String.upcase(verb)
 
-  defp parse_query_params(nil), do: []
+  defp normalize(%URI{host: host} = uri),
+    do: %{uri | host: String.downcase(host)}
 
-  defp parse_query_params(query) do
-    query |> URI.decode_query |> Enum.into []
-  end
-
-  defp normalize_params(params, q_params) do
-    Enum.concat(params, q_params)
-    |> Enum.map(&percent_encode/1)
+  defp normalize([_ | _] = params) do
+    Enum.map(params, &percent_encode/1)
     |> Enum.sort
     |> Enum.map_join("&", &normalize/1)
   end
 
   defp normalize({key, value}) do
     key <> "=" <> value
+  end
+
+  defp parse_url(url) do
+    uri = URI.parse(url)
+    {%{uri | query: nil}, parse_query_params(uri.query)}
+  end
+
+  def parse_query_params(nil), do: []
+
+  def parse_query_params(params) do
+    URI.query_decoder(params) |> Enum.into([])
   end
 
   defp nonce do
