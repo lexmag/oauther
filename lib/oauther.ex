@@ -5,7 +5,9 @@ defmodule OAuther do
   end
 
   def credentials(args) do
-    struct(Credentials, args)
+    Enum.reduce(args, %Credentials{}, fn({key, val}, acc) ->
+      :maps.update(key, val, acc)
+    end)
   end
 
   def sign(verb, url, params, %Credentials{} = creds) do
