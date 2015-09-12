@@ -4,8 +4,6 @@ defmodule OAuther do
                :token, :token_secret, method: :hmac_sha1]
   end
 
-  alias :public_key, as: PKey
-
   def credentials(args) do
     struct(Credentials, args)
   end
@@ -43,7 +41,7 @@ defmodule OAuther do
 
   def signature(verb, url, params, %{method: :rsa_sha1} = creds) do
     base_string(verb, url, params)
-    |> PKey.sign(:sha, read_private_key(creds.consumer_secret))
+    |> :public_key.sign(:sha, read_private_key(creds.consumer_secret))
     |> Base.encode64
   end
 
@@ -67,8 +65,8 @@ defmodule OAuther do
 
   defp read_private_key(path) do
     File.read!(path)
-    |> PKey.pem_decode
-    |> hd |> PKey.pem_entry_decode
+    |> :public_key.pem_decode
+    |> hd() |> :public_key.pem_entry_decode
   end
 
   defp base_string(verb, url, params) do
@@ -87,10 +85,10 @@ defmodule OAuther do
   defp normalize([_ | _] = params) do
     Enum.map(params, &percent_encode/1)
     |> Enum.sort
-    |> Enum.map_join("&", &normalize/1)
+    |> Enum.map_join("&", &normalize_pair/1)
   end
 
-  defp normalize({key, value}) do
+  defp normalize_pair({key, value}) do
     key <> "=" <> value
   end
 
@@ -102,14 +100,16 @@ defmodule OAuther do
   def parse_query_params(nil), do: []
 
   def parse_query_params(params) do
-    URI.query_decoder(params) |> Enum.into([])
+    URI.query_decoder(params)
+    |> Enum.into([])
   end
 
-  defp nonce do
-    :crypto.rand_bytes(32) |> Base.encode64
+  defp nonce() do
+    :crypto.rand_bytes(32)
+    |> Base.encode64
   end
 
-  defp timestamp do
+  defp timestamp() do
     {mgsec, sec, _mcs} = :os.timestamp
 
     mgsec * 1_000_000 + sec
@@ -128,6 +128,7 @@ defmodule OAuther do
   end
 
   defp percent_encode(term) do
-    to_string(term) |> URI.encode(&URI.char_unreserved?/1)
+    to_string(term)
+    |> URI.encode(&URI.char_unreserved?/1)
   end
 end
