@@ -7,6 +7,11 @@ defmodule OAutherTest do
     assert signature(protocol_params(creds), creds) == "tR3+Ty81lMeYAr/Fid0kMTYa/WM="
   end
 
+  test "signature with query params" do
+    creds = OAuther.credentials(consumer_secret: "kd94hf93k423kf44", token_secret: "pfkkdhi9sl3r4s00", consumer_key: "dpf43f3p2l4k3l03", token: "nnch734d00sl2jdk")
+    assert signature(protocol_params(creds), creds, "http://photos.example.com/photos?size=large") == "EgRKfoy8ThOLqmyWXEHgi8+OXTo="
+  end
+
   test "RSA-SHA1 signature" do
     creds = OAuther.credentials(method: :rsa_sha1, consumer_secret: fixture_path("cert.pem"), consumer_key: "dpf43f3p2l4k3l03")
 
