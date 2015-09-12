@@ -100,7 +100,7 @@ defmodule OAuther do
   end
 
   defp nonce do
-    :crypto.rand_bytes(16) |> Hexate.encode
+    :crypto.rand_bytes(32) |> Base.encode64
   end
 
   defp timestamp do
