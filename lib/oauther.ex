@@ -19,6 +19,7 @@ defmodule OAuther do
     end)
   end
 
+  @spec sign(String.t, String.t | URI.t, [{String.t, any}], Credentials.t) :: [{String.t, any}]
   def sign(verb, url, params, %Credentials{} = creds) do
     params = protocol_params(params, creds)
     signature = signature(verb, url, params, creds)
