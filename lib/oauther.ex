@@ -12,6 +12,7 @@ defmodule OAuther do
                :token, :token_secret, method: :hmac_sha1]
   end
 
+  @spec credentials(Enumerable.t) :: Credentials.t
   def credentials(args) do
     Enum.reduce(args, %Credentials{}, fn({key, val}, acc) ->
       :maps.update(key, val, acc)
