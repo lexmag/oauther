@@ -6,6 +6,7 @@ defmodule OAuther.Mixfile do
      version: "1.0.2",
      elixir: ">= 0.14.1",
      description: description,
+     deps: deps,
      package: package]
   end
 
@@ -15,6 +16,10 @@ defmodule OAuther.Mixfile do
 
   defp description,
     do: "Library to authenticate with OAuth 1.0 protocol."
+
+  defp deps do
+    [{:dialyxir, "~> 0.3", only: [:dev]}]
+  end
 
   defp package do
     [files: ["lib", "mix.exs", "README.md", "LICENSE"],
