@@ -13,6 +13,7 @@ defmodule OAuther do
   end
 
   @type http_header :: {String.t, any}
+  @type params :: [{String.t, any}]
 
   @spec credentials(Enumerable.t) :: Credentials.t
   def credentials(args) do
@@ -21,7 +22,7 @@ defmodule OAuther do
     end)
   end
 
-  @spec sign(String.t, String.t | URI.t, [{String.t, any}], Credentials.t) :: [http_header]
+  @spec sign(String.t, String.t | URI.t, params, Credentials.t) :: [http_header]
   def sign(verb, url, params, %Credentials{} = creds) do
     params = protocol_params(params, creds)
     signature = signature(verb, url, params, creds)
@@ -36,7 +37,7 @@ defmodule OAuther do
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
 
-  @spec protocol_params([{String.t, any}], Credentials.t) :: [{String.t, any}]
+  @spec protocol_params(params, Credentials.t) :: [{String.t, any}]
   def protocol_params(params, %Credentials{} = creds) do
     [{"oauth_consumer_key",     creds.consumer_key},
      {"oauth_nonce",            nonce},
@@ -46,6 +47,7 @@ defmodule OAuther do
      | cons_token(params, creds.token)]
   end
 
+  @spec signature(String.t, String.t, params, Credentials.t) :: binary
   def signature(_, _, _, %{method: :plaintext} = creds) do
     compose_key(creds)
   end
@@ -61,6 +63,7 @@ defmodule OAuther do
     |> Base.encode64
   end
 
+  @spec protocol_param?({String.t, any}) :: boolean
   defp protocol_param?({key, _v}) do
     String.starts_with?(key, "oauth_")
   end
