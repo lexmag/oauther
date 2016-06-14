@@ -1,11 +1,11 @@
 defmodule OAuther do
   defmodule Credentials do
     @type t :: %__MODULE__{
-      consumer_key: String.t,
+      consumer_key:    String.t,
       consumer_secret: String.t,
-      token: String.t,
-      token_secret: String.t,
-      method: :hmac_sha1 | :rsa_sha1 | :plaintext
+      token:           String.t,
+      token_secret:    String.t,
+      method:          :hmac_sha1 | :rsa_sha1 | :plaintext
     }
 
     defstruct [:consumer_key, :consumer_secret,
