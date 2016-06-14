@@ -12,6 +12,8 @@ defmodule OAuther do
                :token, :token_secret, method: :hmac_sha1]
   end
 
+  @type http_header :: {String.t, any}
+
   @spec credentials(Enumerable.t) :: Credentials.t
   def credentials(args) do
     Enum.reduce(args, %Credentials{}, fn({key, val}, acc) ->
@@ -19,7 +21,7 @@ defmodule OAuther do
     end)
   end
 
-  @spec sign(String.t, String.t | URI.t, [{String.t, any}], Credentials.t) :: [{String.t, any}]
+  @spec sign(String.t, String.t | URI.t, [{String.t, any}], Credentials.t) :: [http_header]
   def sign(verb, url, params, %Credentials{} = creds) do
     params = protocol_params(params, creds)
     signature = signature(verb, url, params, creds)
@@ -27,12 +29,14 @@ defmodule OAuther do
     [{"oauth_signature", signature} | params]
   end
 
+  @spec header(Enumerable.t) :: {{String.t, String.t}, [http_header]}
   def header(params) do
     {oauth_params, req_params} = Enum.partition(params, &protocol_param?/1)
 
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
 
+  @spec protocol_params([{String.t, any}], Credentials.t) :: [{String.t, any}]
   def protocol_params(params, %Credentials{} = creds) do
     [{"oauth_consumer_key",     creds.consumer_key},
      {"oauth_nonce",            nonce},
