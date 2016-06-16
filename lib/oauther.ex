@@ -150,18 +150,22 @@ defmodule OAuther do
     mgsec * 1_000_000 + sec
   end
 
+  @spec cons_token(params, param) :: params
   defp cons_token(params, nil), do: params
   defp cons_token(params, value),
     do: [{"oauth_token", value} | params]
 
+  @spec sign_method(:plaintext | :hmac_sha1 | :rsa_sha1) :: String.t
   defp sign_method(:plaintext), do: "PLAINTEXT"
   defp sign_method(:hmac_sha1), do: "HMAC-SHA1"
   defp sign_method(:rsa_sha1),  do: "RSA-SHA1"
 
+  # @spec percent_encode(param) :: pair_of_strings
   defp percent_encode({key, value}) do
     {percent_encode(key), percent_encode(value)}
   end
 
+  # @spec percent_encode(any) :: String.t
   defp percent_encode(term) do
     to_string(term)
     |> URI.encode(&URI.char_unreserved?/1)
