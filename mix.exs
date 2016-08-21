@@ -1,22 +1,23 @@
 defmodule OAuther.Mixfile do
   use Mix.Project
 
-  def project do
+  def project() do
     [app: :oauther,
      version: "1.0.2",
      elixir: ">= 0.14.1",
-     description: description,
-     package: package]
+     description: description(),
+     package: package()]
   end
 
-  def application do
+  def application() do
     [applications: []]
   end
 
-  defp description,
-    do: "Library to authenticate with OAuth 1.0 protocol."
+  defp description() do
+    "Library to authenticate with OAuth 1.0 protocol."
+  end
 
-  defp package do
+  defp package() do
     [files: ["lib", "mix.exs", "README.md", "LICENSE"],
      contributors: ["Aleksei Magusev"],
      licenses: ["ISC"],

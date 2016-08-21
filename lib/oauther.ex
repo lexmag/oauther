@@ -1,7 +1,9 @@
 defmodule OAuther do
   defmodule Credentials do
-    defstruct [:consumer_key, :consumer_secret,
-               :token, :token_secret, method: :hmac_sha1]
+    defstruct [
+      :consumer_key, :consumer_secret,
+      :token, :token_secret, method: :hmac_sha1
+    ]
   end
 
   def credentials(args) do
@@ -25,9 +27,9 @@ defmodule OAuther do
 
   def protocol_params(params, %Credentials{} = creds) do
     [{"oauth_consumer_key",     creds.consumer_key},
-     {"oauth_nonce",            nonce},
+     {"oauth_nonce",            nonce()},
      {"oauth_signature_method", sign_method(creds.method)},
-     {"oauth_timestamp",        timestamp},
+     {"oauth_timestamp",        timestamp()},
      {"oauth_version",          "1.0"}
      | cons_token(params, creds.token)]
   end
