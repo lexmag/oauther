@@ -107,7 +107,7 @@ defmodule OAuther do
   end
 
   defp nonce() do
-    :crypto.rand_bytes(32)
+    :crypto.strong_rand_bytes(24)
     |> Base.encode64
   end
 
