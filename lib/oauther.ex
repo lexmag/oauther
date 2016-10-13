@@ -45,7 +45,7 @@ defmodule OAuther do
 
   def signature(verb, url, params, %{method: :rsa_sha1} = creds) do
     base_string(verb, url, params)
-    |> :public_key.sign(:sha, read_private_key(creds.consumer_secret))
+    |> :public_key.sign(:sha, decode_private_key(creds.consumer_secret))
     |> Base.encode64
   end
 
@@ -67,10 +67,20 @@ defmodule OAuther do
     |> Enum.map_join("&", &percent_encode/1)
   end
 
+  defp read_private_key("-----BEGIN RSA PRIVATE KEY-----" <> _ = private_key) do
+    private_key
+  end
+
   defp read_private_key(path) do
     File.read!(path)
-    |> :public_key.pem_decode
-    |> hd() |> :public_key.pem_entry_decode
+  end
+
+  defp decode_private_key(private_key_or_path) do
+    [entry] =
+      private_key_or_path
+      |> read_private_key()
+      |> :public_key.pem_decode()
+    :public_key.pem_entry_decode(entry)
   end
 
   defp base_string(verb, url, params) do
