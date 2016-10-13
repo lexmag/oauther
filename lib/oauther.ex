@@ -67,9 +67,16 @@ defmodule OAuther do
     |> Enum.map_join("&", &percent_encode/1)
   end
 
+  defp read_private_key("-----BEGIN RSA PRIVATE KEY-----" <> _ = key) do
+    do_read_private_key(key)
+  end
   defp read_private_key(path) do
     File.read!(path)
-    |> :public_key.pem_decode
+    |> do_read_private_key
+  end
+
+  defp do_read_private_key(key) do
+    :public_key.pem_decode(key)
     |> hd() |> :public_key.pem_entry_decode
   end
 
