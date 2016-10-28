@@ -19,7 +19,7 @@ defmodule OAuther.Mixfile do
 
   defp package() do
     [files: ["lib", "mix.exs", "README.md", "LICENSE"],
-     contributors: ["Aleksei Magusev"],
+     maintainers: ["Aleksei Magusev"],
      licenses: ["ISC"],
      links: %{"GitHub" => "https://github.com/lexmag/oauther"}]
   end
