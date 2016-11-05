@@ -26,30 +26,30 @@ defmodule OAuther do
   end
 
   def protocol_params(params, %Credentials{} = creds) do
-    [{"oauth_consumer_key",     creds.consumer_key},
-     {"oauth_nonce",            nonce()},
-     {"oauth_signature_method", sign_method(creds.method)},
-     {"oauth_timestamp",        timestamp()},
-     {"oauth_version",          "1.0"}
-     | cons_token(params, creds.token)]
+    [{"oauth_consumer_key", creds.consumer_key},
+     {"oauth_nonce", nonce()},
+     {"oauth_signature_method", signature_method(creds.method)},
+     {"oauth_timestamp", timestamp()},
+     {"oauth_version", "1.0"}
+     | maybe_put_token(params, creds.token)]
   end
 
-  def signature(_, _, _, %{method: :plaintext} = creds) do
+  def signature(_, _, _, %Credentials{method: :plaintext} = creds) do
     compose_key(creds)
   end
 
-  def signature(verb, url, params, %{method: :hmac_sha1} = creds) do
+  def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
     :crypto.hmac(:sha, compose_key(creds), base_string(verb, url, params))
     |> Base.encode64
   end
 
-  def signature(verb, url, params, %{method: :rsa_sha1} = creds) do
+  def signature(verb, url, params, %Credentials{method: :rsa_sha1} = creds) do
     base_string(verb, url, params)
     |> :public_key.sign(:sha, decode_private_key(creds.consumer_secret))
     |> Base.encode64
   end
 
-  defp protocol_param?({key, _v}) do
+  defp protocol_param?({key, _value}) do
     String.starts_with?(key, "oauth_")
   end
 
@@ -90,11 +90,13 @@ defmodule OAuther do
     |> Enum.map_join("&", &percent_encode/1)
   end
 
-  defp normalize(verb) when is_binary(verb),
-    do: String.upcase(verb)
+  defp normalize(verb) when is_binary(verb) do
+    String.upcase(verb)
+  end
 
-  defp normalize(%URI{host: host} = uri),
-    do: %{uri | host: String.downcase(host)}
+  defp normalize(%URI{host: host} = uri) do
+    %{uri | host: String.downcase(host)}
+  end
 
   defp normalize([_ | _] = params) do
     Enum.map(params, &percent_encode/1)
@@ -111,11 +113,13 @@ defmodule OAuther do
     {%{uri | query: nil}, parse_query_params(uri.query)}
   end
 
-  def parse_query_params(nil), do: []
-
-  def parse_query_params(params) do
-    URI.query_decoder(params)
-    |> Enum.into([])
+  defp parse_query_params(params) do
+    if is_nil(params) do
+      []
+    else
+      URI.query_decoder(params)
+      |> Enum.to_list()
+    end
   end
 
   defp nonce() do
@@ -124,25 +128,28 @@ defmodule OAuther do
   end
 
   defp timestamp() do
-    {mgsec, sec, _mcs} = :os.timestamp
-
-    mgsec * 1_000_000 + sec
+    {megasec, sec, _mcs} = :os.timestamp
+    megasec * 1_000_000 + sec
   end
 
-  defp cons_token(params, nil), do: params
-  defp cons_token(params, value),
-    do: [{"oauth_token", value} | params]
+  defp maybe_put_token(params, value) do
+    if is_nil(value) do
+      params
+    else
+      [{"oauth_token", value} | params]
+    end
+  end
 
-  defp sign_method(:plaintext), do: "PLAINTEXT"
-  defp sign_method(:hmac_sha1), do: "HMAC-SHA1"
-  defp sign_method(:rsa_sha1),  do: "RSA-SHA1"
+  defp signature_method(:plaintext), do: "PLAINTEXT"
+  defp signature_method(:hmac_sha1), do: "HMAC-SHA1"
+  defp signature_method(:rsa_sha1), do: "RSA-SHA1"
 
   defp percent_encode({key, value}) do
     {percent_encode(key), percent_encode(value)}
   end
 
-  defp percent_encode(term) do
-    to_string(term)
+  defp percent_encode(other) do
+    to_string(other)
     |> URI.encode(&URI.char_unreserved?/1)
   end
 end
