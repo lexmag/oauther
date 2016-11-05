@@ -4,14 +4,27 @@ defmodule OAuther do
       :consumer_key, :consumer_secret,
       :token, :token_secret, method: :hmac_sha1
     ]
+
+    @type t :: %__MODULE__{
+      consumer_key: String.t,
+      consumer_secret: String.t,
+      token: nil | String.t,
+      token_secret: nil | String.t,
+      method: :hmac_sha1 | :rsa_sha1 | :plaintext
+    }
   end
 
+  @type params :: [{String.t, String.Chars.t}]
+  @type header :: {String.t, String.t}
+
+  @spec credentials(Enumerable.t) :: Credentials.t | no_return
   def credentials(args) do
     Enum.reduce(args, %Credentials{}, fn({key, val}, acc) ->
       :maps.update(key, val, acc)
     end)
   end
 
+  @spec sign(String.t, URI.t | String.t, params, Credentials.t) :: params
   def sign(verb, url, params, %Credentials{} = creds) do
     params = protocol_params(params, creds)
     signature = signature(verb, url, params, creds)
@@ -19,12 +32,14 @@ defmodule OAuther do
     [{"oauth_signature", signature} | params]
   end
 
+  @spec header(params) :: {header, params}
   def header(params) do
     {oauth_params, req_params} = Enum.partition(params, &protocol_param?/1)
 
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
 
+  @spec protocol_params(params, Credentials.t) :: params
   def protocol_params(params, %Credentials{} = creds) do
     [{"oauth_consumer_key", creds.consumer_key},
      {"oauth_nonce", nonce()},
@@ -34,6 +49,7 @@ defmodule OAuther do
      | maybe_put_token(params, creds.token)]
   end
 
+  @spec signature(String.t, URI.t | String.t, params, Credentials.t) :: binary
   def signature(_, _, _, %Credentials{method: :plaintext} = creds) do
     compose_key(creds)
   end
