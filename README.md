@@ -11,7 +11,7 @@ Add OAuther as a dependency to your `mix.exs` file:
 
 ```elixir
 defp deps do
-  [{:oauther, "~> 1.0.1"}]
+  [{:oauther, "~> 1.1"}]
 end
 ```
 
