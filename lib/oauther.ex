@@ -34,7 +34,7 @@ defmodule OAuther do
 
   @spec header(params) :: {header, params}
   def header(params) do
-    {oauth_params, req_params} = Enum.partition(params, &protocol_param?/1)
+    {oauth_params, req_params} = Enum.split_with(params, &protocol_param?/1)
 
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
