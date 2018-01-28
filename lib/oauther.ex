@@ -34,7 +34,7 @@ defmodule OAuther do
 
   @spec header(params) :: {header, params}
   def header(params) do
-    {oauth_params, req_params} = Enum.split_with(params, &protocol_param?/1)
+    {oauth_params, req_params} = enum_split_with(params, &protocol_param?/1)
 
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
@@ -168,4 +168,9 @@ defmodule OAuther do
     to_string(other)
     |> URI.encode(&URI.char_unreserved?/1)
   end
+
+  # Load Enum module
+  Code.ensure_loaded(Enum)
+  split_with = if function_exported?(Enum, :split_with, 2), do: :split_with, else: :partition
+  defp enum_split_with(enum, fun), do: apply(Enum, unquote(split_with), [enum, fun])
 end
