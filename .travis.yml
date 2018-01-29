@@ -27,6 +27,6 @@ matrix:
     - otp_release: 20.1
       elixir: 1.6.0
 
-      sudo: false
+sudo: false
 
-      script: mix test --trace
+script: mix test --trace
