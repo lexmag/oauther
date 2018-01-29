@@ -34,7 +34,7 @@ defmodule OAuther do
 
   @spec header(params) :: {header, params}
   def header(params) do
-    {oauth_params, req_params} = enum_split_with(params, &protocol_param?/1)
+    {oauth_params, req_params} = split_with(params, &protocol_param?/1)
 
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
@@ -169,8 +169,8 @@ defmodule OAuther do
     |> URI.encode(&URI.char_unreserved?/1)
   end
 
-  # Load Enum module
+  # TODO: Remove once we depend on Elixir 1.4 and higher.
   Code.ensure_loaded(Enum)
   split_with = if function_exported?(Enum, :split_with, 2), do: :split_with, else: :partition
-  defp enum_split_with(enum, fun), do: apply(Enum, unquote(split_with), [enum, fun])
+  defp split_with(enum, fun), do: Enum.unquote(split_with)(enum, fun)
 end
