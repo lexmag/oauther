@@ -60,8 +60,14 @@ defmodule OAuther do
   end
 
   def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
-    :sha
-    |> :crypto.hmac(compose_key(creds), base_string(verb, url, params))
+    :hmac
+    |> :crypto.mac(:sha, compose_key(creds), base_string(verb, url, params))
+    |> Base.encode64()
+  end
+
+  def signature(verb, url, params, %Credentials{method: :hmac_sha256} = creds) do
+    :hmac
+    |> :crypto.mac(:sha256, compose_key(creds), base_string(verb, url, params))
     |> Base.encode64()
   end
 
@@ -167,6 +173,7 @@ defmodule OAuther do
 
   defp signature_method(:plaintext), do: "PLAINTEXT"
   defp signature_method(:hmac_sha1), do: "HMAC-SHA1"
+  defp signature_method(:hmac_sha256), do: "HMAC-SHA256"
   defp signature_method(:rsa_sha1), do: "RSA-SHA1"
 
   defp percent_encode({key, value}) do
