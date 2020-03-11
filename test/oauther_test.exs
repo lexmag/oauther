@@ -1,6 +1,17 @@
 defmodule OAutherTest do
   use ExUnit.Case
 
+  setup do
+    %{
+      credentials: [
+        {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
+        {"oauth_signature_method", "PLAINTEXT"},
+        {"oauth_signature", "kd94hf93k423kf44&"},
+        {"build", "Luna Park"}
+      ]
+    }
+  end
+
   test "HMAC-SHA1 signature" do
     creds =
       OAuther.credentials(
@@ -66,18 +77,22 @@ defmodule OAutherTest do
     assert signature(params, creds, "/photos?size=large") == "dzTFIxhRqhwfFqoXYgo4+hoPr2M="
   end
 
-  test "Authorization header" do
-    {header, req_params} =
-      OAuther.header([
-        {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
-        {"oauth_signature_method", "PLAINTEXT"},
-        {"oauth_signature", "kd94hf93k423kf44&"},
-        {"build", "Luna Park"}
-      ])
+  test "Authorization header", %{credentials: credentials} do
+    {header, req_params} = OAuther.header(credentials)
 
     assert header ==
              {"Authorization",
               ~S(OAuth oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26")}
+
+    assert req_params == [{"build", "Luna Park"}]
+  end
+
+  test "Auth header with a realm", %{credentials: credentials} do
+    {header, req_params} = OAuther.header(credentials, "company")
+
+    assert header ==
+             {"Authorization",
+              ~S(OAuth realm="company", oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26")}
 
     assert req_params == [{"build", "Luna Park"}]
   end

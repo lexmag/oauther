@@ -42,6 +42,13 @@ defmodule OAuther do
     {{"Authorization", "OAuth " <> compose_header(oauth_params)}, req_params}
   end
 
+  @spec header(params, String.t()) :: {header, params}
+  def header(params, realm) do
+    {oauth_params, req_params} = split_with(params, &protocol_param?/1)
+
+    {{"Authorization", "OAuth " <> compose_header([{"realm", realm} | oauth_params])}, req_params}
+  end
+
   @spec protocol_params(params, Credentials.t()) :: params
   def protocol_params(params, %Credentials{} = creds) do
     [
