@@ -56,6 +56,34 @@ defmodule OAutherTest do
              "cyZ9hTJnRfkOnF5+OzxXWKKG+hRY+/esxdQAluJem1RlHkZQRsFEevOS5x+A1ZoS+aYlTU3xdHkEKIb/+xuqaavAUFVaIF/5448XsXqSTJomvpoC1c7yw5ArNZnPRLYwK3XYHaIr5FHXbiCG/ze093i2MpsusQU6Shn8lGJNMWE="
   end
 
+  test "RSA-SHA256 signature" do
+    creds =
+      OAuther.credentials(
+        method: :rsa_sha256,
+        consumer_secret: fixture_path("private_key.pem"),
+        consumer_key: "dpf43f3p2l4k3l03"
+      )
+
+    params = protocol_params(creds)
+
+    assert signature(params, creds, "/photos") ==
+             "Kv0wjj1UgDKh6VyQQGCsi30dTBWI0AdVSwTxuRYhmtYTiTgeYcSvIyojQYSuLUtvD4VxX4UzOka6a55gleHiG/EaV4Sl5yz8V5vjrVORMK1fEhEXhYMjgQPvO1wMCdofwkSQHfkYeNpDoZggqnfjS11KOXZXjVFHK/6xsNhmdoM="
+
+    private_key = File.read!(fixture_path("private_key.pem"))
+
+    creds =
+      OAuther.credentials(
+        method: :rsa_sha256,
+        consumer_secret: private_key,
+        consumer_key: "dpf43f3p2l4k3l03"
+      )
+
+    params = protocol_params(creds)
+
+    assert signature(params, creds, "/photos") ==
+             "Kv0wjj1UgDKh6VyQQGCsi30dTBWI0AdVSwTxuRYhmtYTiTgeYcSvIyojQYSuLUtvD4VxX4UzOka6a55gleHiG/EaV4Sl5yz8V5vjrVORMK1fEhEXhYMjgQPvO1wMCdofwkSQHfkYeNpDoZggqnfjS11KOXZXjVFHK/6xsNhmdoM="
+  end
+
   test "PLAINTEXT signature" do
     creds =
       OAuther.credentials(
