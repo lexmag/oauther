@@ -13,7 +13,7 @@ defmodule OAuther do
             consumer_secret: String.t(),
             token: nil | String.t(),
             token_secret: nil | String.t(),
-            method: :hmac_sha1 | :rsa_sha1 | :plaintext
+            method: :hmac_sha1 | :rsa_sha1 | :rsa_sha256 | :plaintext
           }
   end
 
@@ -68,6 +68,12 @@ defmodule OAuther do
   def signature(verb, url, params, %Credentials{method: :rsa_sha1} = creds) do
     base_string(verb, url, params)
     |> :public_key.sign(:sha, decode_private_key(creds.consumer_secret))
+    |> Base.encode64()
+  end
+
+  def signature(verb, url, params, %Credentials{method: :rsa_sha256} = creds) do
+    base_string(verb, url, params)
+    |> :public_key.sign(:sha256, decode_private_key(creds.consumer_secret))
     |> Base.encode64()
   end
 
@@ -168,6 +174,7 @@ defmodule OAuther do
   defp signature_method(:plaintext), do: "PLAINTEXT"
   defp signature_method(:hmac_sha1), do: "HMAC-SHA1"
   defp signature_method(:rsa_sha1), do: "RSA-SHA1"
+  defp signature_method(:rsa_sha256), do: "RSA-SHA256"
 
   defp percent_encode({key, value}) do
     {percent_encode(key), percent_encode(value)}
