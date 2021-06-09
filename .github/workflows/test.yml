@@ -1,0 +1,39 @@
+name: Test OAuther
+
+on: push
+
+jobs:
+  test:
+    name: Elixir Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-elixir@v1
+        with:
+          otp-version: "24.0.2"
+          elixir-version: "1.12.1"
+      - uses: actions/cache@v2
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+      - name: Install dependencies
+        run: |
+          mix local.rebar --force
+          mix local.hex --force --if-missing
+          mix deps.get
+      - name: Compile
+        run: mix compile --warnings-as-errors
+        env:
+          MIX_ENV: test
+      - name: Check code formatting
+        run: mix format --check-formatted
+        env:
+          MIX_ENV: test
+      - name: Run Elixir tests
+        run: mix test
+        env:
+          MIX_ENV: test
