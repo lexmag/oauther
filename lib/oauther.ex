@@ -13,7 +13,7 @@ defmodule OAuther do
             consumer_secret: String.t(),
             token: nil | String.t(),
             token_secret: nil | String.t(),
-            method: :hmac_sha1 | :rsa_sha1 | :rsa_sha256 | :plaintext
+            method: :hmac_sha1 | :hmac_sha256 | :rsa_sha1 | :rsa_sha256 | :plaintext
           }
   end
 
