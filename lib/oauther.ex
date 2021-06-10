@@ -117,7 +117,7 @@ defmodule OAuther do
     File.read!(path)
   end
 
-  defp decode_private_key(private_key_or_path) do
+  def decode_private_key(private_key_or_path) do
     [entry] =
       private_key_or_path
       |> read_private_key()
@@ -126,7 +126,7 @@ defmodule OAuther do
     :public_key.pem_entry_decode(entry)
   end
 
-  defp base_string(verb, url, params) do
+  def base_string(verb, url, params) do
     {uri, query_params} = parse_url(url)
 
     [verb, uri, params ++ query_params]
