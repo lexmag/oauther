@@ -60,8 +60,11 @@ defmodule OAuther do
   end
 
   def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
-    :sha
-    |> :crypto.hmac(compose_key(creds), base_string(verb, url, params))
+    if function_exported?(:crypto, :mac, 4) do
+      :crypto.mac(:hmac, :sha, compose_key(creds), base_string(verb, url, params))
+    else
+      :crypto.hmac(:sha, compose_key(creds), base_string(verb, url, params))
+    end
     |> Base.encode64()
   end
 
