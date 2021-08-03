@@ -14,6 +14,20 @@ defmodule OAutherTest do
     assert signature(params, creds, "/photos") == "tR3+Ty81lMeYAr/Fid0kMTYa/WM="
   end
 
+  test "HMAC-SHA256 signature" do
+    creds =
+      OAuther.credentials(
+        method: :hmac_sha256,
+        consumer_secret: "kd94hf93k423kf44",
+        token_secret: "pfkkdhi9sl3r4s00",
+        consumer_key: "dpf43f3p2l4k3l03",
+        token: "nnch734d00sl2jdk"
+      )
+
+    params = protocol_params(creds)
+    assert signature(params, creds, "/photos") == "WVPzl1j6ZsnkIjWr7e3OZ3jkenL57KwaLFhYsroX1hg="
+  end
+
   test "RSA-SHA1 signature" do
     creds =
       OAuther.credentials(

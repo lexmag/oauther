@@ -9,12 +9,12 @@ defmodule OAuther do
     ]
 
     @type t :: %__MODULE__{
-            consumer_key: String.t(),
-            consumer_secret: String.t(),
-            token: nil | String.t(),
-            token_secret: nil | String.t(),
-            method: :hmac_sha1 | :rsa_sha1 | :plaintext
-          }
+                 consumer_key: String.t(),
+                 consumer_secret: String.t(),
+                 token: nil | String.t(),
+                 token_secret: nil | String.t(),
+                 method: :hmac_sha1 | :hmac_sha246 | :rsa_sha1 | :plaintext
+               }
   end
 
   @type params :: [{String.t(), String.Chars.t()}]
@@ -61,6 +61,12 @@ defmodule OAuther do
 
   def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
     :sha
+    |> :crypto.hmac(compose_key(creds), base_string(verb, url, params))
+    |> Base.encode64()
+  end
+
+  def signature(verb, url, params, %Credentials{method: :hmac_sha256} = creds) do
+    :sha256
     |> :crypto.hmac(compose_key(creds), base_string(verb, url, params))
     |> Base.encode64()
   end
@@ -167,6 +173,7 @@ defmodule OAuther do
 
   defp signature_method(:plaintext), do: "PLAINTEXT"
   defp signature_method(:hmac_sha1), do: "HMAC-SHA1"
+  defp signature_method(:hmac_sha256), do: "HMAC-SHA256"
   defp signature_method(:rsa_sha1), do: "RSA-SHA1"
 
   defp percent_encode({key, value}) do
