@@ -60,11 +60,9 @@ defmodule OAuther do
   end
 
   def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
-    if function_exported?(:crypto, :mac, 4) do
-      :crypto.mac(:hmac, :sha, compose_key(creds), base_string(verb, url, params))
-    else
-      :crypto.hmac(:sha, compose_key(creds), base_string(verb, url, params))
-    end
+    creds
+    |> compose_key()
+    |> hmac_sha(base_string(verb, url, params))
     |> Base.encode64()
   end
 
@@ -72,6 +70,17 @@ defmodule OAuther do
     base_string(verb, url, params)
     |> :public_key.sign(:sha, decode_private_key(creds.consumer_secret))
     |> Base.encode64()
+  end
+
+  Code.ensure_loaded?(:crypto) || IO.warn(":crypto module failed to load")
+  if function_exported?(:crypto, :mac, 4) do
+    defp hmac_sha(key, data) do
+      :crypto.mac(:hmac, :sha, key, data)
+    end
+  else
+    defp hmac_sha(key, data) do
+      :crypto.hmac(:sha, key, data)
+    end
   end
 
   defp protocol_param?({key, _value}) do
