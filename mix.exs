@@ -5,14 +5,15 @@ defmodule OAuther.Mixfile do
     [
       app: :oauther,
       version: "1.1.1",
-      elixir: ">= 0.14.1",
+      elixir: "~> 1.4",
+      consolidate_protocols: Mix.env() != :test,
       description: description(),
       package: package()
     ]
   end
 
   def application() do
-    [applications: [:crypto, :public_key]]
+    [extra_applications: [:crypto, :public_key]]
   end
 
   defp description() do
@@ -21,7 +22,6 @@ defmodule OAuther.Mixfile do
 
   defp package() do
     [
-      files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Aleksei Magusev"],
       licenses: ["ISC"],
       links: %{"GitHub" => "https://github.com/lexmag/oauther"}
