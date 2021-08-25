@@ -26,9 +26,6 @@ jobs:
       - name: Check formatting
         run: mix format --check-formatted
 
-      - name: Check compilation warnings
-        run: mix compile --warnings-as-errors
-
   test:
     name: Test suite
     runs-on: ubuntu-16.04
