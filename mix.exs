@@ -12,7 +12,7 @@ defmodule OAuther.Mixfile do
   end
 
   def application() do
-    [applications: []]
+    [extra_applications: [:crypto, :public_key]]
   end
 
   defp description() do
