@@ -1,6 +1,6 @@
 # OAuther
 
-[![Build Status](https://travis-ci.org/lexmag/oauther.svg)](https://travis-ci.org/lexmag/oauther)
+[![CI Status](https://github.com/lexmag/oauther/workflows/CI/badge.svg)](https://github.com/lexmag/oauther/actions/workflows/ci.yml)
 [![Hex Version](https://img.shields.io/hexpm/v/oauther.svg)](https://hex.pm/packages/oauther)
 
 Library to authenticate with [OAuth 1.0](http://tools.ietf.org/html/rfc5849) protocol.
