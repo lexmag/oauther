@@ -17,7 +17,7 @@ jobs:
       - name: Set up Elixir environment
         uses: erlef/setup-elixir@v1
         with:
-          otp-version: 23.3
+          otp-version: 24
           elixir-version: 1.12
 
       - name: Check unused dependencies
@@ -38,7 +38,7 @@ jobs:
         versions:
           - otp: 18.3
             elixir: 1.4
-          - otp: 23.3
+          - otp: 24
             elixir: 1.12
 
     env:
