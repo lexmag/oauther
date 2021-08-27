@@ -72,8 +72,8 @@ defmodule OAuther do
     |> Base.encode64()
   end
 
-  Code.ensure_loaded?(:crypto) || IO.warn(":crypto module failed to load")
-  if function_exported?(:crypto, :mac, 4) do
+  # TODO: Remove this once we require at minimum OTP 22.
+  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :mac, 4) do
     defp hmac_sha(key, data) do
       :crypto.mac(:hmac, :sha, key, data)
     end
