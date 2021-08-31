@@ -17,7 +17,7 @@ defmodule OAuther.Mixfile do
   end
 
   defp description() do
-    "Library to authenticate with OAuth 1.0 protocol."
+    "A library to authenticate using the OAuth 1.0 protocol."
   end
 
   defp package() do
