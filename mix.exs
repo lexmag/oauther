@@ -4,7 +4,7 @@ defmodule OAuther.Mixfile do
   def project() do
     [
       app: :oauther,
-      version: "1.1.1",
+      version: "1.2.0",
       elixir: "~> 1.4",
       consolidate_protocols: Mix.env() != :test,
       description: description(),
