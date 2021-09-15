@@ -60,14 +60,16 @@ defmodule OAuther do
   end
 
   def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
-    :hmac
-    |> :crypto.mac(:sha, compose_key(creds), base_string(verb, url, params))
+    creds
+    |> compose_key()
+    |> hmac_sha(base_string(verb, url, params), :sha)
     |> Base.encode64()
   end
 
   def signature(verb, url, params, %Credentials{method: :hmac_sha256} = creds) do
-    :hmac
-    |> :crypto.mac(:sha256, compose_key(creds), base_string(verb, url, params))
+    creds
+    |> compose_key()
+    |> hmac_sha(base_string(verb, url, params), :sha256)
     |> Base.encode64()
   end
 
@@ -75,6 +77,17 @@ defmodule OAuther do
     base_string(verb, url, params)
     |> :public_key.sign(:sha, decode_private_key(creds.consumer_secret))
     |> Base.encode64()
+  end
+
+  # TODO: Remove this once we require at minimum OTP 22.
+  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :mac, 4) do
+    defp hmac_sha(key, data, hash_function) do
+      :crypto.mac(:hmac, hash_function, key, data)
+    end
+  else
+    defp hmac_sha(key, data, hash_function) do
+      :crypto.hmac(hash_function, key, data)
+    end
   end
 
   defp protocol_param?({key, _value}) do
