@@ -13,7 +13,7 @@ defmodule OAuther do
             consumer_secret: String.t(),
             token: nil | String.t(),
             token_secret: nil | String.t(),
-            method: :hmac_sha1 | :rsa_sha1 | :plaintext
+            method: :hmac_sha1 | :hmac_sha256 | :rsa_sha1 | :plaintext
           }
   end
 
@@ -62,7 +62,14 @@ defmodule OAuther do
   def signature(verb, url, params, %Credentials{method: :hmac_sha1} = creds) do
     creds
     |> compose_key()
-    |> hmac_sha(base_string(verb, url, params))
+    |> hmac_sha(base_string(verb, url, params), :sha)
+    |> Base.encode64()
+  end
+
+  def signature(verb, url, params, %Credentials{method: :hmac_sha256} = creds) do
+    creds
+    |> compose_key()
+    |> hmac_sha(base_string(verb, url, params), :sha256)
     |> Base.encode64()
   end
 
@@ -74,12 +81,12 @@ defmodule OAuther do
 
   # TODO: Remove this once we require at minimum OTP 22.
   if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :mac, 4) do
-    defp hmac_sha(key, data) do
-      :crypto.mac(:hmac, :sha, key, data)
+    defp hmac_sha(key, data, hash_function) do
+      :crypto.mac(:hmac, hash_function, key, data)
     end
   else
-    defp hmac_sha(key, data) do
-      :crypto.hmac(:sha, key, data)
+    defp hmac_sha(key, data, hash_function) do
+      :crypto.hmac(hash_function, key, data)
     end
   end
 
@@ -179,6 +186,7 @@ defmodule OAuther do
 
   defp signature_method(:plaintext), do: "PLAINTEXT"
   defp signature_method(:hmac_sha1), do: "HMAC-SHA1"
+  defp signature_method(:hmac_sha256), do: "HMAC-SHA256"
   defp signature_method(:rsa_sha1), do: "RSA-SHA1"
 
   defp percent_encode({key, value}) do
