@@ -5,6 +5,16 @@
 
 OAuther is a library to authenticate using the [OAuth 1.0](http://tools.ietf.org/html/rfc5849) protocol.
 
+All the standard signature methods are supported:
+
+* HMAC-SHA1
+* RSA-SHA1
+* PLAINTEXT
+
+This library also supports non-standard signature methods (that replace SHA-1 with stronger hashing algorithms):
+
+* HMAC-SHA256
+
 ## Installation
 
 Add the `:oauther` dependency to your `mix.exs` file:
