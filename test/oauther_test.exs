@@ -1,6 +1,24 @@
 defmodule OAutherTest do
   use ExUnit.Case
 
+  describe "header/1" do
+    test "Authorization header" do
+      {header, req_params} =
+        OAuther.header([
+          {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
+          {"oauth_signature_method", "PLAINTEXT"},
+          {"oauth_signature", "kd94hf93k423kf44&"},
+          {"build", "Luna Park"}
+        ])
+
+      assert header ==
+               {"Authorization",
+                ~S(OAuth oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26")}
+
+      assert req_params == [{"build", "Luna Park"}]
+    end
+  end
+
   describe "signature/4" do
     test "HMAC-SHA1 signature" do
       creds =
@@ -80,22 +98,6 @@ defmodule OAutherTest do
       params = protocol_params(creds)
       assert signature(params, creds, "/photos?size=large") == "dzTFIxhRqhwfFqoXYgo4+hoPr2M="
     end
-  end
-
-  test "Authorization header" do
-    {header, req_params} =
-      OAuther.header([
-        {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
-        {"oauth_signature_method", "PLAINTEXT"},
-        {"oauth_signature", "kd94hf93k423kf44&"},
-        {"build", "Luna Park"}
-      ])
-
-    assert header ==
-             {"Authorization",
-              ~S(OAuth oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26")}
-
-    assert req_params == [{"build", "Luna Park"}]
   end
 
   defp fixture_path(file_path) do
