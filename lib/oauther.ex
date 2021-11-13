@@ -22,9 +22,7 @@ defmodule OAuther do
 
   @spec credentials(Enumerable.t()) :: Credentials.t() | no_return
   def credentials(args) do
-    Enum.reduce(args, %Credentials{}, fn {key, val}, acc ->
-      :maps.update(key, val, acc)
-    end)
+    struct(Credentials, args)
   end
 
   @spec sign(String.t(), URI.t() | String.t(), params, Credentials.t()) :: params
