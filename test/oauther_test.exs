@@ -8,7 +8,26 @@ defmodule OAutherTest do
                consumer_secret: "kd94hf93k423kf44",
                method: :hmac_sha1,
                token: "nnch734d00sl2jdk",
-               token_secret: "pfkkdhi9sl3r4s00"
+               token_secret: "pfkkdhi9sl3r4s00",
+               realm: "Photos"
+             } ==
+               OAuther.credentials(
+                 consumer_key: "dpf43f3p2l4k3l03",
+                 consumer_secret: "kd94hf93k423kf44",
+                 token: "nnch734d00sl2jdk",
+                 token_secret: "pfkkdhi9sl3r4s00",
+                 realm: "Photos"
+               )
+    end
+
+    test "by default realm is set to nil" do
+      assert %OAuther.Credentials{
+               consumer_key: "dpf43f3p2l4k3l03",
+               consumer_secret: "kd94hf93k423kf44",
+               method: :hmac_sha1,
+               token: "nnch734d00sl2jdk",
+               token_secret: "pfkkdhi9sl3r4s00",
+               realm: nil
              } ==
                OAuther.credentials(
                  consumer_key: "dpf43f3p2l4k3l03",
@@ -26,11 +45,13 @@ defmodule OAutherTest do
           consumer_secret: "kd94hf93k423kf44",
           token_secret: "pfkkdhi9sl3r4s00",
           consumer_key: "dpf43f3p2l4k3l03",
-          token: "nnch734d00sl2jdk"
+          token: "nnch734d00sl2jdk",
+          realm: "Photos"
         )
 
       assert [
                {"oauth_signature", _},
+               {"realm", "Photos"},
                {"oauth_token", "nnch734d00sl2jdk"},
                {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
                {"oauth_nonce", _},
@@ -49,12 +70,13 @@ defmodule OAutherTest do
           {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
           {"oauth_signature_method", "PLAINTEXT"},
           {"oauth_signature", "kd94hf93k423kf44&"},
+          {"realm", "Photos"},
           {"build", "Luna Park"}
         ])
 
       assert header ==
                {"Authorization",
-                ~S(OAuth oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26")}
+                ~S(OAuth oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26", realm="Photos")}
 
       assert req_params == [{"build", "Luna Park"}]
     end
@@ -67,7 +89,30 @@ defmodule OAutherTest do
           consumer_secret: "kd94hf93k423kf44",
           token_secret: "pfkkdhi9sl3r4s00",
           consumer_key: "dpf43f3p2l4k3l03",
-          token: "nnch734d00sl2jdk"
+          token: "nnch734d00sl2jdk",
+          realm: "Photos"
+        )
+
+      assert [
+               {"realm", "Photos"},
+               {"oauth_token", "nnch734d00sl2jdk"},
+               {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
+               {"oauth_nonce", _},
+               {"oauth_signature_method", "HMAC-SHA1"},
+               {"oauth_timestamp", _},
+               {"oauth_version", "1.0"},
+               {"custom_param", "123"}
+             ] = OAuther.protocol_params([{"custom_param", "123"}], creds)
+    end
+
+    test "when realm is not present it's not included in the list of protocol params" do
+      creds =
+        OAuther.credentials(
+          consumer_secret: "kd94hf93k423kf44",
+          token_secret: "pfkkdhi9sl3r4s00",
+          consumer_key: "dpf43f3p2l4k3l03",
+          token: "nnch734d00sl2jdk",
+          realm: nil
         )
 
       assert [
@@ -160,6 +205,20 @@ defmodule OAutherTest do
 
       params = protocol_params(creds)
       assert signature(params, creds, "/photos?size=large") == "dzTFIxhRqhwfFqoXYgo4+hoPr2M="
+    end
+
+    test "signature with realm" do
+      creds =
+        OAuther.credentials(
+          consumer_secret: "kd94hf93k423kf44",
+          token_secret: "pfkkdhi9sl3r4s00",
+          consumer_key: "dpf43f3p2l4k3l03",
+          token: "nnch734d00sl2jdk",
+          realm: "Photos"
+        )
+
+      params = protocol_params(creds)
+      assert signature(params, creds, "/photos") == "9QG3oRtIpkf/+slqLB7SDlccBZU="
     end
   end
 
