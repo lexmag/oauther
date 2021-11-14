@@ -5,6 +5,7 @@ defmodule OAuther do
       :consumer_secret,
       :token,
       :token_secret,
+      realm: nil,
       method: :hmac_sha1
     ]
 
@@ -13,6 +14,7 @@ defmodule OAuther do
             consumer_secret: String.t(),
             token: nil | String.t(),
             token_secret: nil | String.t(),
+            realm: nil | String.t(),
             method: :hmac_sha1 | :hmac_sha256 | :rsa_sha1 | :plaintext
           }
   end
@@ -22,9 +24,7 @@ defmodule OAuther do
 
   @spec credentials(Enumerable.t()) :: Credentials.t() | no_return
   def credentials(args) do
-    Enum.reduce(args, %Credentials{}, fn {key, val}, acc ->
-      :maps.update(key, val, acc)
-    end)
+    struct(Credentials, args)
   end
 
   @spec sign(String.t(), URI.t() | String.t(), params, Credentials.t()) :: params
@@ -50,8 +50,10 @@ defmodule OAuther do
       {"oauth_signature_method", signature_method(creds.method)},
       {"oauth_timestamp", timestamp()},
       {"oauth_version", "1.0"}
-      | maybe_put_token(params, creds.token)
+      | params
     ]
+    |> maybe_add("oauth_token", creds.token)
+    |> maybe_add("realm", creds.realm)
   end
 
   @spec signature(String.t(), URI.t() | String.t(), params, Credentials.t()) :: binary
@@ -91,7 +93,7 @@ defmodule OAuther do
   end
 
   defp protocol_param?({key, _value}) do
-    String.starts_with?(key, "oauth_")
+    String.starts_with?(key, "oauth_") or key == "realm"
   end
 
   defp compose_header([_ | _] = params) do
@@ -176,13 +178,8 @@ defmodule OAuther do
     megasec * 1_000_000 + sec
   end
 
-  defp maybe_put_token(params, value) do
-    if is_nil(value) do
-      params
-    else
-      [{"oauth_token", value} | params]
-    end
-  end
+  defp maybe_add(params, _key, nil = _value), do: params
+  defp maybe_add(params, key, value), do: [{key, value} | params]
 
   defp signature_method(:plaintext), do: "PLAINTEXT"
   defp signature_method(:hmac_sha1), do: "HMAC-SHA1"
