@@ -1,6 +1,47 @@
 defmodule OAutherTest do
   use ExUnit.Case
 
+  describe "credentials/1" do
+    test "returns Credentials struct" do
+      assert %OAuther.Credentials{
+               consumer_key: "dpf43f3p2l4k3l03",
+               consumer_secret: "kd94hf93k423kf44",
+               method: :hmac_sha1,
+               token: "nnch734d00sl2jdk",
+               token_secret: "pfkkdhi9sl3r4s00"
+             } ==
+               OAuther.credentials(
+                 consumer_key: "dpf43f3p2l4k3l03",
+                 consumer_secret: "kd94hf93k423kf44",
+                 token: "nnch734d00sl2jdk",
+                 token_secret: "pfkkdhi9sl3r4s00"
+               )
+    end
+  end
+
+  describe "sign/4" do
+    test "returns list of params with oauth_signature" do
+      creds =
+        OAuther.credentials(
+          consumer_secret: "kd94hf93k423kf44",
+          token_secret: "pfkkdhi9sl3r4s00",
+          consumer_key: "dpf43f3p2l4k3l03",
+          token: "nnch734d00sl2jdk"
+        )
+
+      assert [
+               {"oauth_signature", _},
+               {"oauth_token", "nnch734d00sl2jdk"},
+               {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
+               {"oauth_nonce", _},
+               {"oauth_signature_method", "HMAC-SHA1"},
+               {"oauth_timestamp", _},
+               {"oauth_version", "1.0"},
+               {"custom_param", "123"}
+             ] = OAuther.sign("get", "http://test.com", [{"custom_param", "123"}], creds)
+    end
+  end
+
   describe "header/1" do
     test "Authorization header" do
       {header, req_params} =
@@ -16,6 +57,28 @@ defmodule OAutherTest do
                 ~S(OAuth oauth_consumer_key="dpf43f3p2l4k3l03", oauth_signature_method="PLAINTEXT", oauth_signature="kd94hf93k423kf44%26")}
 
       assert req_params == [{"build", "Luna Park"}]
+    end
+  end
+
+  describe "protocol_params/2" do
+    test "returns params list with protocol params" do
+      creds =
+        OAuther.credentials(
+          consumer_secret: "kd94hf93k423kf44",
+          token_secret: "pfkkdhi9sl3r4s00",
+          consumer_key: "dpf43f3p2l4k3l03",
+          token: "nnch734d00sl2jdk"
+        )
+
+      assert [
+               {"oauth_token", "nnch734d00sl2jdk"},
+               {"oauth_consumer_key", "dpf43f3p2l4k3l03"},
+               {"oauth_nonce", _},
+               {"oauth_signature_method", "HMAC-SHA1"},
+               {"oauth_timestamp", _},
+               {"oauth_version", "1.0"},
+               {"custom_param", "123"}
+             ] = OAuther.protocol_params([{"custom_param", "123"}], creds)
     end
   end
 
